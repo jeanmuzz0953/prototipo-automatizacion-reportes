@@ -1,0 +1,10 @@
+{
+  "name": "Reporte de Ruta",
+  "short_name": "Reporte",
+  "description": "Registro de rutas para transportistas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#2563eb",
+  "orientation": "portrait"
+}

@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Ruta</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Reporte de Ruta">
     <style>
         * { box-sizing: border-box; }
         body {
@@ -123,6 +129,9 @@
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto">
+    <div id="offlineBanner" class="hidden" style="background:#713f12;color:#fef08a;text-align:center;padding:.6rem 1rem;font-size:.85rem;font-weight:600;border-radius:.5rem;margin-bottom:1rem;">
+        ⚠️ Sin conexión — el reporte se guardará y enviará automáticamente cuando recuperes señal
+    </div>
     <h1 class="text-2xl font-bold mb-6 text-center">Reporte de Ruta</h1>
     
     <form id="reportForm" class="space-y-6">
@@ -435,32 +444,40 @@
             return result;
         }
 
-        // Sincronizar offline cuando vuelve el internet
-        window.addEventListener('online', async () => {
+        // Sincronizar reportes pendientes
+        async function syncPendingReports() {
             const queue = JSON.parse(localStorage.getItem('reportQueue') || '[]');
-            if (queue.length > 0) {
-                showStatus(`Sincronizando ${queue.length} reportes pendientes...`, 'loading');
-                let successCount = 0;
-                
-                for (let i = 0; i < queue.length; i++) {
-                    try {
-                        await sendData(queue[i]);
-                        successCount++;
-                    } catch (e) {
-                        console.error('Error sincronizando item', e);
-                    }
-                }
-                
-                // Limpiar los enviados
-                queue.splice(0, successCount);
-                localStorage.setItem('reportQueue', JSON.stringify(queue));
-                
-                if (successCount > 0) {
-                    showStatus(`${successCount} reportes sincronizados con éxito`, 'success');
-                    triggerConfetti();
+            if (queue.length === 0) return;
+            showStatus(`Sincronizando ${queue.length} reporte${queue.length > 1 ? 's' : ''} pendiente${queue.length > 1 ? 's' : ''}...`, 'loading');
+            let successCount = 0;
+            for (let i = 0; i < queue.length; i++) {
+                try {
+                    await sendData(queue[i]);
+                    successCount++;
+                } catch (e) {
+                    console.error('Error sincronizando reporte:', e);
                 }
             }
-        });
+            queue.splice(0, successCount);
+            localStorage.setItem('reportQueue', JSON.stringify(queue));
+            if (successCount > 0) {
+                showStatus(`${successCount} reporte${successCount > 1 ? 's' : ''} enviado${successCount > 1 ? 's' : ''} con éxito`, 'success');
+                triggerConfetti();
+            }
+        }
+
+        // Indicador de conexión
+        function updateOnlineStatus() {
+            const banner = document.getElementById('offlineBanner');
+            if (!navigator.onLine) {
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        window.addEventListener('online', () => { updateOnlineStatus(); syncPendingReports(); });
+        window.addEventListener('offline', updateOnlineStatus);
 
         function resetForm() {
             form.reset();
@@ -469,6 +486,17 @@
             preview.classList.add('hidden');
             preview.src = '';
         }
+
+        // Inicialización: verificar conexión, sincronizar pendientes y registrar Service Worker
+        window.addEventListener('load', () => {
+            updateOnlineStatus();
+            if (navigator.onLine) syncPendingReports();
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(err =>
+                    console.warn('Service Worker no se pudo registrar:', err)
+                );
+            }
+        });
     </script>
 </body>
 </html>
