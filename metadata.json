@@ -1,0 +1,5 @@
+{
+  "name": "Reporte de Rutas",
+  "description": "App móvil para registrar inicio y fin de rutas con fotos y GPS.",
+  "requestFramePermissions": ["camera", "geolocation"]
+}
