@@ -16,3 +16,24 @@ El desarrollo de esta solución se abordó bajo una arquitectura moderna orienta
 ### Resultados
 La implementación de este prototipo demuestra que es posible trasladar la carga de trabajo de ingreso de datos al usuario final mediante una interfaz sencilla y robusta. La capacidad de operar sin conexión y el procesamiento automatizado de metadatos eliminan la fricción para los choferes. Por su parte, la administración obtiene un tablero de control (dashboard) automatizado y estructurado, eliminando al 100% el tiempo de digitación y ensamblaje de reportes a fin de mes.
 
+(Vista de la PWA que usa el chofer)
+
+
+
+
+
+![Vista del Formulario Frontend](app_preview.png)
+
+
+(Dashboard automatizado generado en Google Sheets)
+
+
+
+
+
+![Reportes Automatizado](reportes_preview.png)
+
+
+![Dashboard Automatizado](dashboard_preview.png)
+
+
